@@ -18,8 +18,7 @@ def start_roscore() -> None:
 
 
 def start_gazebo() -> None:
-    """Starts an empty Gazebo world from the existing terminal."""
-    # -e can be replaced by --, but then it crashes
+    """Starts an empty Gazebo world from a new terminal."""
     subprocess.Popen(["gnome-terminal", "-e", "rosrun gazebo_ros gazebo"])
     time.sleep(3)
     close_message_print()

@@ -15,6 +15,7 @@ def create_a_nexus_car(name: str, port: str, simulation: bool) -> NexusCar:
     """Creates and returns a NexusCar object."""
 
     nexus_car = NexusCar(
+        name=name,
         velocity_magnitude=0.1,
         time_step=0.05,
         simulation=simulation,
@@ -23,7 +24,7 @@ def create_a_nexus_car(name: str, port: str, simulation: bool) -> NexusCar:
     if simulation:
         try:
             start_gazebo()
-            nexus_car.init_simulation(model_name=name)
+            nexus_car.init_simulation()
         except Exception as e:  # find a proper Gazebo error
             sys.stderr.write(f"could not open Gazebo. {e}")
         return nexus_car

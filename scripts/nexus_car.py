@@ -5,6 +5,7 @@ University of Groningen
 Last modified: 23-03-2023
 """
 
+from statistics import mode
 import sys, time, traceback, serial, rospy
 from typing import List
 from struct import pack, unpack
@@ -29,15 +30,34 @@ class NexusCar:
 
     def __init__(
         self,
+        name: str = "nexus_car",
         velocity_magnitude: float = 0.1,
         time_step: float = 0.05,
         simulation: bool = False,
     ) -> None:
         """Initialize a NexusCar object."""
+        self.name = name
         self.simulation = simulation
         self.time_step = time_step
         self.velocity_magnitude = velocity_magnitude
         self.post_init()
+
+    def post_init(self) -> None:
+        """Set the rate and coordinate system."""
+        rospy.init_node(self.name)
+        self.rate = rospy.Rate(1 / self.time_step)
+
+        self.pose = Pose()
+        self.pose.position.x = 0.0
+        self.pose.position.y = 0.0
+        self.pose.position.z = 0.0
+
+        self.x = self.pose.position.x
+        self.y = self.pose.position.y
+        self.xlist = [self.x]
+        self.ylist = [self.y]
+        self.previous_move = [0.0, 0.0, 0.0]
+        print(f"The Nexus car is properly intialized and ready for use.")
 
     def init_connection(
         self,
@@ -63,38 +83,18 @@ class NexusCar:
         self.break_state = False
         # NEED TO CREATE A PUBLISHER FOR /ODOM FOR CURRENT POSE,TWIST ETC.
 
-    # model_path: str = "/home/alex/.gazebo/models/cafe_table/model.sdf",
     def init_simulation(
         self,
-        model_name: str = "nexus_car",
         model_path: str = "/home/alex/catkin_ws/src/nexus_controller/simulation_models/nexus_robot.sdf",
     ) -> None:
         """Initialize simulation models."""
-        self.model_name = model_name
         self.model_path = model_path
-        spawn_model(self.model_name, self.model_path, self.pose)
-
-    def post_init(self) -> None:
-        """Quick check and set the coordinate system."""
-        rospy.init_node("nexus_car")
-        self.rate = rospy.Rate(1 / self.time_step)
-
-        self.pose = Pose()
-        self.pose.position.x = 0.0
-        self.pose.position.y = 0.0
-        self.pose.position.z = 0.0
-
-        self.x = self.pose.position.x
-        self.y = self.pose.position.y
-        self.xlist = [self.x]
-        self.ylist = [self.y]
-        self.previous_move = [0.0, 0.0, 0.0]
-        print(f"The Nexus car is properly intialized and ready for use.")
+        spawn_model(self.name, self.model_path, self.pose)
 
     def stop(self) -> None:
         """Set movement to 0 and close the connection."""
         if self.simulation:
-            delete_model(self.model_name)
+            delete_model(self.name)
         else:
             self.setspeed(0, 0, 0)
             self.serial.close()
@@ -111,8 +111,8 @@ class NexusCar:
     def start(self) -> None:
         """Move around and locate a landmark."""
         # GAZEBO AUTOMATICALLY MAKES A PUBLISHER FOR /ODOM
-        # publisher_name = self.model_name + "/cmd_vel"
-        # subscriber_name = self.model_name + "/pose"
+        # publisher_name = self.name + "/cmd_vel"
+        # subscriber_name = self.name + "/pose"
         self.cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
 
         # this performs 'measure', either real-world robot or gazebo needs to publish
