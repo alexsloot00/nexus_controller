@@ -9,6 +9,7 @@ import sys, time, argparse
 from distance_only_estimator import DistanceOnlyEstimator
 from landmark import Landmark
 from create_nexus_car import create_a_nexus_car
+from scripts.helper_functions import parse_simulation_argument
 from terminal_functions import start_roscore
 
 
@@ -39,7 +40,7 @@ def main() -> None:
     )
 
     argument = parser.parse_args()
-    simulation = argument.simulation
+    simulation = parse_simulation_argument(argument.simulation)
     port = argument.port
     name = argument.name
 
@@ -63,8 +64,8 @@ def main() -> None:
     nexus_car.start()
 
     # stop the system
-    nexus_car.stop()
-    sys.exit()
+    # nexus_car.stop()
+    # sys.exit()
 
 
 if __name__ == "__main__":

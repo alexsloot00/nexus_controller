@@ -2,11 +2,11 @@
 """
 Author: Alex Sloot
 University of Groningen
-Last modified: 23-03-2023
+Last modified: 27-03-2023
 """
 
-from statistics import mode
 import sys, time, traceback, serial, rospy
+import matplotlib.pyplot as plt
 from typing import List
 from struct import pack, unpack
 
@@ -56,6 +56,8 @@ class NexusCar:
         self.y = self.pose.position.y
         self.xlist = [self.x]
         self.ylist = [self.y]
+        self.lx = []
+        self.ly = []
         self.previous_move = [0.0, 0.0, 0.0]
         print(f"The Nexus car is properly intialized and ready for use.")
 
@@ -94,11 +96,14 @@ class NexusCar:
     def stop(self) -> None:
         """Set movement to 0 and close the connection."""
         if self.simulation:
-            delete_model(self.name)
+            # delete_model(self.name)  # why delete the model?
+            pass
         else:
             self.setspeed(0, 0, 0)
             self.serial.close()
-        # self.plot() # doesnt work like this on remote access
+        self.plot()  # doesnt work like this on remote access
+        print("signal shutdown")
+        rospy.signal_shutdown(reason="landmark estimation successful")
 
     def give_DO_estimator(self, estimator: DistanceOnlyEstimator) -> None:
         """Uses a distance-only estimator."""
@@ -123,6 +128,14 @@ class NexusCar:
 
     def do_iteration(self, data: Odometry) -> None:
         """Perform 1 iteration of measure,calculate,update,act."""
+        # check if landmark was correctly estimated and stop if yes
+        if (
+            abs(self.estimator.landmark.x - self.estimator.landmark._x_star) < 0.06
+            and abs(self.estimator.landmark.y - self.estimator.landmark._y_star) < 0.06
+        ):
+            print("stopping")
+            self.stop()
+
         movement = self.calculate(data)
         self.update()
         self.act(movement)
@@ -146,6 +159,8 @@ class NexusCar:
         self.y = self.pose.position.y
         self.xlist.append(self.x)
         self.ylist.append(self.y)
+        self.lx.append(self.estimator.landmark.x)
+        self.ly.append(self.estimator.landmark.y)
 
     def predict(self) -> None:
         """Predict where the robot and landmark are using past estimate and new measurement."""
@@ -215,9 +230,14 @@ class NexusCar:
 
     def plot(self) -> None:
         """Plot the trajectory of the robot."""
-        # plt.plot(self.xlist, self.ylist)
-        # plt.show()
-        pass
+        plt.plot(self.xlist, self.ylist, linewidth=3)
+        plt.plot(self.lx, self.ly)
+        plt.scatter(
+            self.estimator.landmark._x_star,
+            self.estimator.landmark._y_star,
+            s=10,
+        )
+        plt.show()
 
     #### Send commands
     def sendwheelscommand(

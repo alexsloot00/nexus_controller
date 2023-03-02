@@ -21,7 +21,8 @@ def create_a_nexus_car(name: str, port: str, simulation: bool) -> NexusCar:
         simulation=simulation,
     )
 
-    if simulation:
+    if simulation == True or simulation is True:
+        print(f"simulation is {simulation}")
         try:
             start_gazebo()
             nexus_car.init_simulation()
@@ -43,6 +44,9 @@ def create_a_nexus_car(name: str, port: str, simulation: bool) -> NexusCar:
 
     except SerialException as e:
         sys.stderr.write("Could not open port %r: %s\n" % (port, e))
+        print(
+            "Solve 'Permission denied' using 'sudo chmod a+rw /dev/ttyUSB0', assuming the port is '/dev/ttyUSB0'."
+        )
         sys.exit(1)
 
     # quick test to make sure the Nexus is ready

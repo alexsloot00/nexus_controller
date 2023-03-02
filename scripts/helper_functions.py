@@ -15,3 +15,15 @@ def map_to_two_pi(value: float) -> float:
         return value + 2 * math.pi
     else:
         return value
+
+
+def parse_simulation_argument(strbool: str) -> bool:
+    strbool = strbool.lower()
+    if strbool == "false":
+        return False
+    elif strbool == "true":
+        return True
+    else:
+        print(
+            "WARNING: simulation is not a valid input, choose 'True' or 'False'. Now using simulation=True."
+        )
