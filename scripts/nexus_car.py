@@ -56,7 +56,8 @@ class NexusCar:
         self.x = self.pose.position.x
         self.y = self.pose.position.y
         self.z = self.pose.position.z
-        self.timelist = [time.time()]
+        self.starttime = time.time()
+        self.timelist = [self.starttime]
         self.zerolist = [0]
         self.xlist = [self.x]
         self.ylist = [self.y]
@@ -98,6 +99,14 @@ class NexusCar:
         self.model_path = model_path
         spawn_model(self.name, self.model_path, self.pose)
 
+    def give_DO_estimator(self, estimator: DistanceOnlyEstimator) -> None:
+        """Uses a distance-only estimator."""
+        self.estimator = estimator
+
+    def give_WSR_estimator(self, estimator: WSREstimator) -> None:
+        """Uses a WiFi-only WSR toolbox estimator."""
+        self.estimator = estimator
+
     def stop(self) -> None:
         """Set movement to 0 and close the connection."""
         if self.simulation:
@@ -110,14 +119,6 @@ class NexusCar:
         # self.plot()  # doesnt work like this on remote access
         print("signal shutdown")
         rospy.signal_shutdown(reason="landmark estimation successful")
-
-    def give_DO_estimator(self, estimator: DistanceOnlyEstimator) -> None:
-        """Uses a distance-only estimator."""
-        self.estimator = estimator
-
-    def give_WSR_estimator(self, estimator: WSREstimator) -> None:
-        """Uses a WiFi-only WSR toolbox estimator."""
-        self.estimator = estimator
 
     def start(self) -> None:
         """Move around and locate a landmark."""
@@ -135,14 +136,16 @@ class NexusCar:
     def do_iteration(self, data: Odometry) -> None:
         """Perform 1 iteration of measure,calculate,update,act."""
         # check if landmark was correctly estimated and stop if yes
-        if (
-            abs(self.estimator.landmark.x - self.estimator.landmark._x_star) < 0.06
-            and abs(self.estimator.landmark.y - self.estimator.landmark._y_star) < 0.06
-            and self.simulation
-        ):
+        # if (
+        #     abs(self.estimator.landmark.x - self.estimator.landmark._x_star) < 0.06
+        #     and abs(self.estimator.landmark.y - self.estimator.landmark._y_star) < 0.06
+        #     and self.simulation
+        # ):
+        if self.timestamp > self.starttime + 10:
             print("stopping")
             self.stop()
 
+        print("starting an iteration")
         movement = self.calculate(data)
         self.update()
         self.act(movement)
