@@ -2,7 +2,7 @@
 """
 Author: Alex Sloot
 University of Groningen
-Last modified: 23-03-2023
+Last modified: 02-03-2023
 """
 import math
 
@@ -18,6 +18,7 @@ def map_to_two_pi(value: float) -> float:
 
 
 def parse_simulation_argument(strbool: str) -> bool:
+    """Converts the simulation string input to a boolean value."""
     strbool = strbool.lower()
     if strbool == "false":
         return False

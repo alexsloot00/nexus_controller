@@ -7,6 +7,7 @@ Last modified: 27-03-2023
 
 import sys, time, traceback, serial, rospy
 import matplotlib.pyplot as plt
+import pandas as pd
 from typing import List
 from struct import pack, unpack
 
@@ -50,16 +51,20 @@ class NexusCar:
         self.pose = Pose()
         self.pose.position.x = 0.0
         self.pose.position.y = 0.0
-        self.pose.position.z = 0.0
+        self.pose.position.z = 0.1  # center of mass above ground
 
         self.x = self.pose.position.x
         self.y = self.pose.position.y
+        self.z = self.pose.position.z
+        self.timelist = [time.time()]
+        self.zerolist = [0]
         self.xlist = [self.x]
         self.ylist = [self.y]
+        self.zlist = [self.z]
         self.lx = []
         self.ly = []
         self.previous_move = [0.0, 0.0, 0.0]
-        print(f"The Nexus car is properly intialized and ready for use.")
+        print(f"The Nexus car is intialized.")
 
     def init_connection(
         self,
@@ -83,7 +88,7 @@ class NexusCar:
         self.dtr_state = True
         self.rts_state = True
         self.break_state = False
-        # NEED TO CREATE A PUBLISHER FOR /ODOM FOR CURRENT POSE,TWIST ETC.
+        self.odom_publisher = rospy.Publisher("/odom", Odometry, queue_size=10)
 
     def init_simulation(
         self,
@@ -101,7 +106,8 @@ class NexusCar:
         else:
             self.setspeed(0, 0, 0)
             self.serial.close()
-        self.plot()  # doesnt work like this on remote access
+        self.output_csv()
+        # self.plot()  # doesnt work like this on remote access
         print("signal shutdown")
         rospy.signal_shutdown(reason="landmark estimation successful")
 
@@ -132,6 +138,7 @@ class NexusCar:
         if (
             abs(self.estimator.landmark.x - self.estimator.landmark._x_star) < 0.06
             and abs(self.estimator.landmark.y - self.estimator.landmark._y_star) < 0.06
+            and self.simulation
         ):
             print("stopping")
             self.stop()
@@ -154,11 +161,15 @@ class NexusCar:
 
     def process_data(self, data: Odometry) -> None:
         """Process the measured data into useable inputs."""
+        self.timestamp = time.time()
         self.pose = data.pose.pose
         self.x = self.pose.position.x
         self.y = self.pose.position.y
+        self.timelist.append(self.timestamp)
+        self.zerolist.append(0)
         self.xlist.append(self.x)
         self.ylist.append(self.y)
+        self.zlist.append(self.z)
         self.lx.append(self.estimator.landmark.x)
         self.ly.append(self.estimator.landmark.y)
 
@@ -180,13 +191,15 @@ class NexusCar:
     def update(self) -> None:
         """Update the landmark and robot position estimations."""
         # already done in measure and predict (first update robot_pos before doing any calculations)
-        pass
+        self.x += self.time_step * self.previous_move[0]
+        self.y += self.time_step * self.previous_move[1]
 
     def act(self, movement: List[float]) -> None:
         """Use control algorithm and model parameters to translate into action."""
         x = movement[0]
         y = movement[1]
         rotation = 0  # not provided yet
+        self.previous_move = [x, y, rotation]
         if self.simulation:
             vel_msg = Twist()
             vel_msg.linear.x = x
@@ -195,7 +208,11 @@ class NexusCar:
             self.cmd_vel_publisher.publish(vel_msg)
         else:
             self.setspeed(x, y, rotation)
-        self.previous_move = [x, y, rotation]
+            odom_msg = Odometry()
+            odom_msg.pose.pose.position.x = self.x
+            odom_msg.pose.pose.position.y = self.y
+            odom_msg.pose.pose.position.z = self.z
+            self.odom_publisher.publish(odom_msg)
 
     def move_square(self) -> None:
         """Move the Nexus in a square trajectory."""
@@ -238,6 +255,15 @@ class NexusCar:
             s=10,
         )
         plt.show()
+
+    def output_csv(self) -> None:
+        """Creates the movement csv for WSR toolbox."""
+        df = pd.DataFrame(
+            list(
+                zip(*[self.timelist, self.zerolist, self.xlist, self.ylist, self.zlist])
+            )
+        )
+        df.to_csv("rx_movement.csv", index=False, header=False)
 
     #### Send commands
     def sendwheelscommand(

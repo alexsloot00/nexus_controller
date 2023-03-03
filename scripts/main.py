@@ -7,9 +7,10 @@ Last modified: 23-03-2023
 
 import sys, time, argparse
 from distance_only_estimator import DistanceOnlyEstimator
+from wsr_estimator import WSREstimator
 from landmark import Landmark
 from create_nexus_car import create_a_nexus_car
-from scripts.helper_functions import parse_simulation_argument
+from helper_functions import parse_simulation_argument
 from terminal_functions import start_roscore
 
 
@@ -22,7 +23,7 @@ def main() -> None:
         "--simulation",
         help="choose: True/False, i.e. -simulation False",
         required=False,
-        default=True,
+        default="True",
     )
     parser.add_argument(
         "-port",
@@ -51,11 +52,12 @@ def main() -> None:
     nexus_car = create_a_nexus_car(name=name, port=port, simulation=simulation)
 
     # create a landmark, initialize on robot position (0,0)
-    landmark = Landmark(theta=-1.6, simulation=simulation)
-    landmark.initialize(0, 0)
+    # landmark = Landmark(theta=-1.6, simulation=simulation)
+    # landmark.initialize(0, 0)
 
     # choose an estimator and assign to the nexus_car
-    estimator = DistanceOnlyEstimator(landmark)
+    # estimator = DistanceOnlyEstimator(landmark)
+    estimator = WSREstimator()
     nexus_car.give_DO_estimator(estimator)
 
     # choose what to do
