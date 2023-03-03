@@ -7,6 +7,7 @@ Last modified: 23-03-2023
 
 import sys, time, argparse
 from distance_only_estimator import DistanceOnlyEstimator
+import rospy
 from wsr_estimator import WSREstimator
 from landmark import Landmark
 from create_nexus_car import create_a_nexus_car

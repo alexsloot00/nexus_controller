@@ -52,13 +52,11 @@ class NexusCar:
         self.pose.position.x = 0.0
         self.pose.position.y = 0.0
         self.pose.position.z = 0.1  # center of mass above ground
-
         self.x = self.pose.position.x
         self.y = self.pose.position.y
         self.z = self.pose.position.z
-        self.starttime = time.time()
-        self.timelist = [self.starttime]
-        self.zerolist = [0]
+        self.timelist = []
+        self.zerolist = [0]  # for nanosecond time, unused
         self.xlist = [self.x]
         self.ylist = [self.y]
         self.zlist = [self.z]
@@ -116,7 +114,7 @@ class NexusCar:
             self.setspeed(0, 0, 0)
             self.serial.close()
         self.output_csv()
-        # self.plot()  # doesnt work like this on remote access
+        # self.plot()  # doesnt work like on ssh
         print("signal shutdown")
         rospy.signal_shutdown(reason="landmark estimation successful")
 
@@ -131,7 +129,23 @@ class NexusCar:
         self.odometry_subscriber = rospy.Subscriber(
             "/odom", Odometry, self.do_iteration
         )
-        self.measure()
+        # Set start time
+        self.starttime = time.time()
+        self.timestamp = self.starttime
+        self.timelist.append(self.starttime)
+
+        # Main loop
+        if not self.simulation:
+            while not rospy.is_shutdown():
+                odom_msg = Odometry()
+                odom_msg.pose.pose.position.x = self.x
+                odom_msg.pose.pose.position.y = self.y
+                odom_msg.pose.pose.position.z = self.z
+                self.odom_publisher.publish(odom_msg)
+
+                self.rate.sleep()
+        else:
+            self.measure()
 
     def do_iteration(self, data: Odometry) -> None:
         """Perform 1 iteration of measure,calculate,update,act."""
@@ -202,7 +216,6 @@ class NexusCar:
         x = movement[0]
         y = movement[1]
         rotation = 0  # not provided yet
-        self.previous_move = [x, y, rotation]
         if self.simulation:
             vel_msg = Twist()
             vel_msg.linear.x = x
@@ -211,11 +224,7 @@ class NexusCar:
             self.cmd_vel_publisher.publish(vel_msg)
         else:
             self.setspeed(x, y, rotation)
-            odom_msg = Odometry()
-            odom_msg.pose.pose.position.x = self.x
-            odom_msg.pose.pose.position.y = self.y
-            odom_msg.pose.pose.position.z = self.z
-            self.odom_publisher.publish(odom_msg)
+        self.previous_move = [x, y, rotation]
 
     def move_square(self) -> None:
         """Move the Nexus in a square trajectory."""

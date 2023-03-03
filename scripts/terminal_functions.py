@@ -30,6 +30,27 @@ def close_message_print() -> None:
     print("-----------------------------------------------------------------")
 
 
+# def setup_WSR() -> None:
+#     """Sets the correct RX stuff."""
+#     subprocess.Popen(
+#         ["gnome-terminal", "-e", "sudo ./WSR-WifiDriver/setup.sh 59 108 HT20"]
+#     )
+
+
+# # "sudo ./WSR-WifiDriver/setup.sh 59 108 HT20 && sudo ~/WSR-Toolbox-linux-80211n-csitool-supplementary/netlink/log_to_file csi_rx.dat",
+
+
+# def start_WSR_transmitting() -> None:
+#     """Starts to transmit data."""
+#     subprocess.Popen(
+#         [
+#             "gnome-terminal",
+#             "--",
+#             "sudo ~/WSR-Toolbox-linux-80211n-csitool-supplementary/injection/random_packets_two_antenna 1000 57 1 7000",
+#         ]
+#     )
+
+
 if __name__ == "__main__":
     start_roscore()
     start_gazebo()
