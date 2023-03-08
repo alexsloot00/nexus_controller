@@ -47,18 +47,18 @@ def main() -> None:
     name = argument.name
 
     # start a rosmaster
-    start_roscore()
+    # start_roscore()
 
     # create an instance of the nexus car
     nexus_car = create_a_nexus_car(name=name, port=port, simulation=simulation)
 
     # create a landmark, initialize on robot position (0,0)
-    # landmark = Landmark(theta=-1.6, simulation=simulation)
-    # landmark.initialize(0, 0)
+    landmark = Landmark(theta=-1.6, simulation=simulation)
+    landmark.initialize(0, 0)
 
     # choose an estimator and assign to the nexus_car
     # estimator = DistanceOnlyEstimator(landmark)
-    estimator = WSREstimator()
+    estimator = WSREstimator(landmark)
     nexus_car.give_DO_estimator(estimator)
 
     # choose what to do

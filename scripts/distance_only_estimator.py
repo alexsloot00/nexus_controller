@@ -59,7 +59,9 @@ class DistanceOnlyEstimator:
         """Predict where the robot and landmark are using past estimate and new measurement."""
         self.landmark.update_estimate(robot_x, robot_y, time_step, u, w)
 
-    def decide_movement(self, robot_x: float, robot_y: float, magnitude: float) -> None:
+    def decide_movement(
+        self, robot_x: float, robot_y: float, magnitude: float, time_passed: float
+    ) -> None:
         """Decide how to move the robot based on the prediction"""
         z_est = self.landmark.get_z_estimate()
         z_distance = self.landmark.predict_distance(robot_x, robot_y)

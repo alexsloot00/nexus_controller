@@ -199,9 +199,10 @@ class NexusCar:
     def decide(self, move_with_keyboard: bool) -> List[float]:
         """Decide how to act based on the prediction."""
         # move orthogonally to landmark
+        time_passed = self.timestamp - self.starttime
         if not move_with_keyboard:
             return self.estimator.decide_movement(
-                self.x, self.y, self.velocity_magnitude
+                self.x, self.y, self.velocity_magnitude, time_passed
             )
         # move using keyboard inputs
 

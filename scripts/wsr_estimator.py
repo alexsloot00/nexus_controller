@@ -5,6 +5,7 @@ University of Groningen
 Last modified: 23-03-2023
 """
 
+import math
 from landmark import Landmark
 from typing import List
 
@@ -54,9 +55,17 @@ class WSREstimator:
         """Predict where the robot and landmark are using past estimate and new measurement."""
         pass
 
-    def decide_movement(self, robot_x: float, robot_y: float, magnitude: float) -> None:
+    def decide_movement(
+        self, robot_x: float, robot_y: float, magnitude: float, time_passed: float
+    ) -> List[float]:
         """Decide how to act based on the prediction"""
-        return [0, 0]
+        circle_radius = 0.3  # meters
+        # angle based on 10 seconds total time
+        angle = time_passed / 10 * math.radians(360)
+        w = 1  # derivative of angle increase
+        xdot = -circle_radius * w * math.sin(angle)
+        ydot = circle_radius * w * math.cos(angle)
+        return [xdot, ydot]
 
     def update(self) -> None:
         """Update the landmark and robot position estimations"""
@@ -64,3 +73,26 @@ class WSREstimator:
 
     def print(self) -> None:
         print("printing")
+
+
+def test(time_passed):
+    circle_radius = 1  # meters
+    # angle based on 10 seconds total time
+    angle = time_passed / 10 * math.radians(360)
+    w = 1  # derivative of angle increase
+    xdot = -circle_radius * w * math.sin(angle)
+    ydot = circle_radius * w * math.cos(angle)
+    return [xdot, ydot]
+
+
+if __name__ == "__main__":
+    a = test(0)
+    print(a)
+    a = test(2.5)
+    print(a)
+    a = test(5)
+    print(a)
+    a = test(7.5)
+    print(a)
+    a = test(10)
+    print(a)
