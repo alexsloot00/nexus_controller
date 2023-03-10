@@ -7,7 +7,6 @@ Last modified: 23-03-2023
 
 import sys, time, argparse
 from distance_only_estimator import DistanceOnlyEstimator
-import rospy
 from wsr_estimator import WSREstimator
 from landmark import Landmark
 from create_nexus_car import create_a_nexus_car
@@ -27,6 +26,13 @@ def main() -> None:
         default="True",
     )
     parser.add_argument(
+        "-name",
+        "--name",
+        help="choose: a name, i.e. -name nexus_car",
+        required=False,
+        default="nexus_car",
+    )
+    parser.add_argument(
         "-port",
         "--port",
         help="choose: a port, i.e. -port /dev/ttyUSB0",
@@ -34,23 +40,47 @@ def main() -> None:
         default="/dev/ttyUSB0",
     )
     parser.add_argument(
-        "-name",
-        "--name",
-        help="choose: a name, i.e. -name  nexus_car",
+        "-velmag",
+        "--velmag",
+        help="Choose velocity magnitude: i.e. -velmag 0.1",
         required=False,
-        default="nexus_car",
+        default=0.1,
+    )
+    parser.add_argument(
+        "-timestep",
+        "--timestep",
+        help="Choose a timestep in seconds: i.e. -timestep 0.05",
+        required=False,
+        default="circle",
+    )
+    parser.add_argument(
+        "-move",
+        "--move",
+        help="Choose circle, straight, sideways: i.e. -move circle",
+        required=False,
+        default="circle",
     )
 
     argument = parser.parse_args()
     simulation = parse_simulation_argument(argument.simulation)
-    port = argument.port
     name = argument.name
+    port = argument.port
+    velocity_magnitude = argument.velocity_magnitude
+    time_step = argument.time_step
+    move = argument.move
 
-    # start a rosmaster
+    # start a rosmaster (does not work on ssh access)
     # start_roscore()
 
     # create an instance of the nexus car
-    nexus_car = create_a_nexus_car(name=name, port=port, simulation=simulation)
+    nexus_car = create_a_nexus_car(
+        simulation=simulation,
+        name=name,
+        port=port,
+        velocity_magnitude=velocity_magnitude,
+        time_step=time_step,
+        move=move,
+    )
 
     # create a landmark, initialize on robot position (0,0)
     landmark = Landmark(theta=-1.6, simulation=simulation)
@@ -68,7 +98,7 @@ def main() -> None:
 
     # stop the system
     # nexus_car.stop()
-    # sys.exit()
+    sys.exit()
 
 
 if __name__ == "__main__":

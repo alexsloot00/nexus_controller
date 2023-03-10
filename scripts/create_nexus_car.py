@@ -4,6 +4,7 @@ Author: Alex Sloot
 University of Groningen
 Last modified: 23-03-2023
 """
+
 import sys, time
 from serial import SerialException
 
@@ -11,14 +12,22 @@ from nexus_car import NexusCar, CONVERT_CRLF
 from terminal_functions import start_gazebo
 
 
-def create_a_nexus_car(name: str, port: str, simulation: bool) -> NexusCar:
+def create_a_nexus_car(
+    simulation: bool,
+    name: str,
+    port: str,
+    velocity_magnitude: float,
+    time_step: float,
+    move: str,
+) -> NexusCar:
     """Creates and returns a NexusCar object."""
 
     nexus_car = NexusCar(
-        name=name,
-        velocity_magnitude=0.1,
-        time_step=0.05,
         simulation=simulation,
+        name=name,
+        velocity_magnitude=velocity_magnitude,
+        time_step=time_step,
+        move=move,
     )
 
     if simulation == True or simulation is True:

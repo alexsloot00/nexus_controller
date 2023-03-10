@@ -14,6 +14,8 @@ class WSREstimator:
     def __init__(self, landmark: Landmark) -> None:
         """Initializer, needs a landmark object."""
         self.landmark = landmark
+        self.previous_angle = 0.0
+        self.prev_time_passed = 0.0
 
     def do_iteration(
         self,
@@ -56,16 +58,35 @@ class WSREstimator:
         pass
 
     def decide_movement(
-        self, robot_x: float, robot_y: float, magnitude: float, time_passed: float
+        self,
+        robot_x: float,
+        robot_y: float,
+        magnitude: float,
+        time_passed: float,
+        move: str = "circle",
     ) -> List[float]:
         """Decide how to act based on the prediction"""
-        circle_radius = 0.3  # meters
-        # angle based on 10 seconds total time
-        angle = time_passed / 10 * math.radians(360)
-        w = 1  # derivative of angle increase
-        xdot = -circle_radius * w * math.sin(angle)
-        ydot = circle_radius * w * math.cos(angle)
-        return [xdot, ydot]
+        print(time_passed)
+        move = move.lower()
+        if move == "circle":
+            circle_radius = magnitude
+            # angle based on 10 seconds total time
+            angle = time_passed / 10 * math.radians(360)
+            w = (angle - self.previous_angle) / (
+                time_passed - self.prev_time_passed
+            )  # derivative of angle increase
+            xdot = -circle_radius * w * math.sin(angle)
+            ydot = circle_radius * w * math.cos(angle)
+            self.previous_angle = angle
+            self.prev_time_passed = time_passed
+            return [xdot, ydot]
+        elif move == "sideways":
+            return [0, magnitude]
+        elif move == "straight":
+            return [magnitude, 0]
+        else:
+            print("Not a valid movement option! Remain standing still")
+            return [0, 0]
 
     def update(self) -> None:
         """Update the landmark and robot position estimations"""

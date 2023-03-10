@@ -31,16 +31,18 @@ class NexusCar:
 
     def __init__(
         self,
+        simulation: bool = False,
         name: str = "nexus_car",
         velocity_magnitude: float = 0.1,
         time_step: float = 0.05,
-        simulation: bool = False,
+        move: str = "circle",
     ) -> None:
         """Initialize a NexusCar object."""
         self.name = name
         self.simulation = simulation
         self.time_step = time_step
         self.velocity_magnitude = velocity_magnitude
+        self.move = move.lower()
         self.post_init()
 
     def post_init(self) -> None:
@@ -159,7 +161,7 @@ class NexusCar:
             print("stopping")
             self.stop()
 
-        print("starting an iteration")
+        # print("starting an iteration")
         movement = self.calculate(data)
         self.update()
         self.act(movement)
@@ -202,7 +204,7 @@ class NexusCar:
         time_passed = self.timestamp - self.starttime
         if not move_with_keyboard:
             return self.estimator.decide_movement(
-                self.x, self.y, self.velocity_magnitude, time_passed
+                self.x, self.y, self.velocity_magnitude, time_passed, self.move
             )
         # move using keyboard inputs
 
