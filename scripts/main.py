@@ -51,12 +51,12 @@ def main() -> None:
         "--timestep",
         help="Choose a timestep in seconds: i.e. -timestep 0.05",
         required=False,
-        default="circle",
+        default=0.05,
     )
     parser.add_argument(
         "-move",
         "--move",
-        help="Choose circle, straight, sideways: i.e. -move circle",
+        help="Choose: circle, forward, backward right, left: i.e. -move circle",
         required=False,
         default="circle",
     )
@@ -65,8 +65,8 @@ def main() -> None:
     simulation = parse_simulation_argument(argument.simulation)
     name = argument.name
     port = argument.port
-    velocity_magnitude = argument.velocity_magnitude
-    time_step = argument.time_step
+    velocity_magnitude = argument.velmag
+    time_step = argument.timestep
     move = argument.move
 
     # start a rosmaster (does not work on ssh access)

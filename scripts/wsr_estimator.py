@@ -80,10 +80,14 @@ class WSREstimator:
             self.previous_angle = angle
             self.prev_time_passed = time_passed
             return [xdot, ydot]
-        elif move == "sideways":
-            return [0, magnitude]
-        elif move == "straight":
+        elif move == "forward":  # forward is negative!
+            return [-magnitude, 0]
+        elif move == "backward":  # backward is positive!
             return [magnitude, 0]
+        elif move == "right":  # right is positive!
+            return [0, magnitude]
+        elif move == "left":  # left is negative!
+            return [0, -magnitude]
         else:
             print("Not a valid movement option! Remain standing still")
             return [0, 0]
