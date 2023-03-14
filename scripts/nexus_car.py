@@ -2,18 +2,17 @@
 """
 Author: Alex Sloot
 University of Groningen
-Last modified: 27-03-2023
+Last modified: 14-03-2023
 """
 
 import sys, time, traceback, serial, rospy
+from estimator import Estimator
 import matplotlib.pyplot as plt
 import pandas as pd
 from typing import List
 from struct import pack, unpack
 
 # import matplotlib.pyplot as plt
-from distance_only_estimator import DistanceOnlyEstimator
-from wsr_estimator import WSREstimator
 from geometry_msgs.msg import Pose, Twist
 from nav_msgs.msg import Odometry
 
@@ -99,12 +98,8 @@ class NexusCar:
         self.model_path = model_path
         spawn_model(self.name, self.model_path, self.pose)
 
-    def give_DO_estimator(self, estimator: DistanceOnlyEstimator) -> None:
-        """Uses a distance-only estimator."""
-        self.estimator = estimator
-
-    def give_WSR_estimator(self, estimator: WSREstimator) -> None:
-        """Uses a WiFi-only WSR toolbox estimator."""
+    def give_estimator(self, estimator: Estimator) -> None:
+        """Give the nexus car the WSR or DistanceOnly estimator."""
         self.estimator = estimator
 
     def stop(self) -> None:

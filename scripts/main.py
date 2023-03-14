@@ -2,15 +2,13 @@
 """
 Author: Alex Sloot
 University of Groningen
-Last modified: 23-03-2023
+Last modified: 14-03-2023
 """
 
 import sys, time, argparse
-from distance_only_estimator import DistanceOnlyEstimator
-from wsr_estimator import WSREstimator
 from landmark import Landmark
 from create_nexus_car import create_a_nexus_car
-from helper_functions import parse_bool_argument, parse_float_argument
+from setup_functions import parse_bool_argument, parse_float_argument, pick_estimator
 from terminal_functions import start_roscore
 
 
@@ -24,6 +22,13 @@ def main() -> None:
         help="choose: True/False, i.e. -simulation False",
         required=False,
         default="True",
+    )
+    parser.add_argument(
+        "-estimator",
+        "--estimator",
+        help="choose WSR/DO (distance-only), i.e. -estimator DO",
+        required=False,
+        default="WSR",
     )
     parser.add_argument(
         "-name",
@@ -63,6 +68,7 @@ def main() -> None:
 
     argument = parser.parse_args()
     simulation = parse_bool_argument(argument.simulation)
+    estimator_type = argument.estimator
     name = argument.name
     port = argument.port
     velocity_magnitude = parse_float_argument(argument.velmag)
@@ -87,9 +93,8 @@ def main() -> None:
     landmark.initialize(0, 0)
 
     # choose an estimator and assign to the nexus_car
-    estimator = DistanceOnlyEstimator(landmark)
-    # estimator = WSREstimator(landmark)
-    nexus_car.give_DO_estimator(estimator)
+    estimator = pick_estimator(estimator_type, landmark)
+    nexus_car.give_estimator(estimator)
 
     # choose what to do
     # nexus_car.move_square()
