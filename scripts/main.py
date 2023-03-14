@@ -97,7 +97,7 @@ def main() -> None:
     nexus_car.give_estimator(estimator)
 
     # choose what to do
-    # nexus_car.move_square()
+    # nexus_car.move_demo_square()
     time.sleep(5)
     nexus_car.start()
 

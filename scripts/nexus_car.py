@@ -57,7 +57,7 @@ class NexusCar:
         self.y = self.pose.position.y
         self.z = self.pose.position.z
         self.timelist = []
-        self.zerolist = [0]  # for nanosecond time, unused
+        self.nanoseconds = [0]  # for nanosecond time, unused
         self.xlist = [self.x]
         self.ylist = [self.y]
         self.zlist = [self.z]
@@ -180,7 +180,7 @@ class NexusCar:
         self.x = self.pose.position.x
         self.y = self.pose.position.y
         self.timelist.append(self.timestamp)
-        self.zerolist.append(0)
+        self.nanoseconds.append(0)
         self.xlist.append(self.x)
         self.ylist.append(self.y)
         self.zlist.append(self.z)
@@ -224,7 +224,7 @@ class NexusCar:
             self.setspeed(x, y, rotation)
         self.previous_move = [x, y, rotation]
 
-    def move_square(self) -> None:
+    def move_demo_square(self) -> None:
         """Move the Nexus in a square trajectory."""
         if self.simulation:
             vel_msg = Twist()
@@ -270,7 +270,15 @@ class NexusCar:
         """Creates the movement csv for WSR toolbox."""
         df = pd.DataFrame(
             list(
-                zip(*[self.timelist, self.zerolist, self.xlist, self.ylist, self.zlist])
+                zip(
+                    *[
+                        self.timelist,
+                        self.nanoseconds,
+                        self.xlist,
+                        self.ylist,
+                        self.zlist,
+                    ]
+                )
             )
         )
         df.to_csv("rx_movement.csv", index=False, header=False)
