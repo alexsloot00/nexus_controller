@@ -5,10 +5,11 @@ University of Groningen
 Last modified: 23-03-2023
 """
 from typing import List
+from estimator import Estimator
 from landmark import Landmark
 
 
-class DistanceOnlyEstimator:
+class DistanceOnlyEstimator(Estimator):
     """Estimator for a landmark position using range only measurements."""
 
     def __init__(self, landmark: Landmark) -> None:
@@ -60,7 +61,12 @@ class DistanceOnlyEstimator:
         self.landmark.update_estimate(robot_x, robot_y, time_step, u, w)
 
     def decide_movement(
-        self, robot_x: float, robot_y: float, magnitude: float, time_passed: float
+        self,
+        robot_x: float,
+        robot_y: float,
+        magnitude: float,
+        time_passed: float,
+        move: str = "circle",
     ) -> None:
         """Decide how to move the robot based on the prediction"""
         z_est = self.landmark.get_z_estimate()

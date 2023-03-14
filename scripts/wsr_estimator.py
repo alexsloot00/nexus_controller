@@ -6,11 +6,12 @@ Last modified: 23-03-2023
 """
 
 import math
+from estimator import Estimator
 from landmark import Landmark
 from typing import List
 
 
-class WSREstimator:
+class WSREstimator(Estimator):
     def __init__(self, landmark: Landmark) -> None:
         """Initializer, needs a landmark object."""
         self.landmark = landmark

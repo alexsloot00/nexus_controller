@@ -39,7 +39,7 @@ class Landmark:
         self.pr_distance = self._measure_distance(robot_x, robot_y)  # measurement
         self.m_distance = self._measure_distance(robot_x, robot_y)  # should be unknown
         self._update_xy(robot_x, robot_y)  # uses _distance, should use distance
-        print(f"Initial landmark prediction values: x={self.x:.2f}, y={self.y:.2f}")
+        # print(f"Initial landmark prediction values: x={self.x:.2f}, y={self.y:.2f}")
         if self.simulation:
             # pose_ = Pose()
             # pose_.position.x = self._x_star

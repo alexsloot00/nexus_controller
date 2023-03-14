@@ -10,7 +10,7 @@ from distance_only_estimator import DistanceOnlyEstimator
 from wsr_estimator import WSREstimator
 from landmark import Landmark
 from create_nexus_car import create_a_nexus_car
-from helper_functions import parse_simulation_argument
+from helper_functions import parse_bool_argument, parse_float_argument
 from terminal_functions import start_roscore
 
 
@@ -56,17 +56,17 @@ def main() -> None:
     parser.add_argument(
         "-move",
         "--move",
-        help="Choose: circle, forward, backward right, left: i.e. -move circle",
+        help="Choose: circle, forward, backward, right, left: i.e. -move circle",
         required=False,
         default="circle",
     )
 
     argument = parser.parse_args()
-    simulation = parse_simulation_argument(argument.simulation)
+    simulation = parse_bool_argument(argument.simulation)
     name = argument.name
     port = argument.port
-    velocity_magnitude = argument.velmag
-    time_step = argument.timestep
+    velocity_magnitude = parse_float_argument(argument.velmag)
+    time_step = parse_float_argument(argument.timestep)
     move = argument.move
 
     # start a rosmaster (does not work on ssh access)
@@ -87,8 +87,8 @@ def main() -> None:
     landmark.initialize(0, 0)
 
     # choose an estimator and assign to the nexus_car
-    # estimator = DistanceOnlyEstimator(landmark)
-    estimator = WSREstimator(landmark)
+    estimator = DistanceOnlyEstimator(landmark)
+    # estimator = WSREstimator(landmark)
     nexus_car.give_DO_estimator(estimator)
 
     # choose what to do
