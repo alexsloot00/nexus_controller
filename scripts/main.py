@@ -68,11 +68,12 @@ def main() -> None:
     parser.add_argument(
         "-runtime",
         "--runtime",
-        help="Choose how long to run in seconds: i.e. -runtime 10",
+        help="Choose how long to run in seconds: i.e. -runtime 10.0",
         required=False,
         default=10.0,
     )
 
+    # parsing the arguments from string to their repective types
     argument = parser.parse_args()
     simulation = parse_bool_argument(argument.simulation)
     estimator_type = argument.estimator
@@ -83,8 +84,7 @@ def main() -> None:
     move = argument.move
     runtime = parse_float_argument(argument.runtime)
 
-    # start a rosmaster if in simulation
-    # start manually if using ssh access
+    # Note: start one manually if using ssh access
     if simulation:
         start_roscore()
 
@@ -111,7 +111,7 @@ def main() -> None:
     # nexus_car.move_demo_square()
     print("Wait...")
     time.sleep(4)
-    print("Please start broadcasting now.")
+    print("Starting in 1 second.")
     time.sleep(1)
     nexus_car.start()
 
