@@ -19,6 +19,7 @@ def create_a_nexus_car(
     velocity_magnitude: float,
     time_step: float,
     move: str,
+    runtime: float,
 ) -> NexusCar:
     """Creates and returns a NexusCar object."""
 
@@ -28,6 +29,7 @@ def create_a_nexus_car(
         velocity_magnitude=velocity_magnitude,
         time_step=time_step,
         move=move,
+        run_time=runtime,
     )
 
     if simulation == True or simulation is True:

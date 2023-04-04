@@ -35,6 +35,7 @@ class NexusCar:
         velocity_magnitude: float = 0.1,
         time_step: float = 0.05,
         move: str = "circle",
+        run_time: float = 10.0,
     ) -> None:
         """Initialize a NexusCar object."""
         self.name = name
@@ -42,6 +43,7 @@ class NexusCar:
         self.time_step = time_step
         self.velocity_magnitude = velocity_magnitude
         self.move = move.lower()
+        self.run_time = run_time
         self.post_init()
 
     def post_init(self) -> None:
@@ -131,6 +133,13 @@ class NexusCar:
         self.timestamp = self.starttime
         self.timelist.append(self.starttime)
 
+        # Start first iteration at time = 0
+        odom_msg = Odometry()
+        odom_msg.pose.pose.position.x = self.x
+        odom_msg.pose.pose.position.y = self.y
+        odom_msg.pose.pose.position.z = self.z
+        self.do_iteration(odom_msg)
+
         # Main loop
         if not self.simulation:
             while not rospy.is_shutdown():
@@ -152,8 +161,8 @@ class NexusCar:
         #     and abs(self.estimator.landmark.y - self.estimator.landmark._y_star) < 0.06
         #     and self.simulation
         # ):
-        if self.timestamp > self.starttime + 10:
-            print("stopping")
+        if self.timestamp >= self.starttime + self.run_time:
+            print("Stopping")
             self.stop()
 
         # print("starting an iteration")
@@ -222,6 +231,8 @@ class NexusCar:
             self.cmd_vel_publisher.publish(vel_msg)
         else:
             self.setspeed(x, y, rotation)
+        if y > 0:
+            y = y / 1.33
         self.previous_move = [x, y, rotation]
 
     def move_demo_square(self) -> None:
@@ -283,7 +294,21 @@ class NexusCar:
         )
         df.to_csv("rx_movement.csv", index=False, header=False)
 
-    #### Send commands
+    #### Send commands to Arduino
+    def setspeed(self, linx: float, liny: float, rot: float) -> None:
+        """Sets the speed of the Nexus in x (forward), y(sideways) directions and rotates by rot."""
+        # lineaire x and y (m/sec) and rotatie (rad/sec) snelheid
+        # convert to nexus (calibrated with nexus1)
+        speedx = linx * -1024
+        speedy = liny * -1024
+        rot = rot * 300
+        self.sendwheelscommand(
+            speedx - speedy - rot,
+            speedx + speedy - rot,
+            speedx - speedy + rot,
+            speedx + speedy + rot,
+        )
+
     def sendwheelscommand(
         self, frontleft: float, backleft: float, frontright: float, backright: float
     ) -> None:
@@ -300,22 +325,7 @@ class NexusCar:
         self.serial.write(outpkt)  # send packet
         # print 'outpkt: ', unpack('h', outpkt[2:4]), unpack('h', outpkt[4:6]), unpack('h', outpkt[6:8]), unpack('h',outpkt[8:10])
 
-    def setspeed(self, linx: float, liny: float, rot: float) -> None:
-        """Sets the speed of the Nexus in x (forward), y(sideways) directions and rotates by rot."""
-        # lineaire x and y (m/sec) and rotatie (rad/sec) snelheid
-        # convert to nexus (calibrated with nexus1)
-        speedx = linx * -1024
-        speedy = liny * -1024
-        rot = rot * 300
-        self.sendwheelscommand(
-            speedx - speedy - rot,
-            speedx + speedy - rot,
-            speedx - speedy + rot,
-            speedx + speedy + rot,
-        )
-
-    #### stuff for checking etc
-
+    #### Check Arduino connection
     def getinfopacket(self) -> None:
         """Check connection with Raspberry Pi from Nexus."""
         try:

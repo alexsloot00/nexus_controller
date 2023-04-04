@@ -67,17 +67,21 @@ class WSREstimator(Estimator):
         move: str = "circle",
     ) -> List[float]:
         """Decide how to act based on the prediction"""
+        # moving right needs * 1.33 as the motors to move right are weaker!
         print(time_passed)
         move = move.lower()
         if move == "circle":
             circle_radius = magnitude
             # angle based on 10 seconds total time
             angle = time_passed / 10 * math.radians(360)
+            print(angle)
             w = (angle - self.previous_angle) / (
                 time_passed - self.prev_time_passed
             )  # derivative of angle increase
             xdot = -circle_radius * w * math.sin(angle)
             ydot = circle_radius * w * math.cos(angle)
+            if ydot > 0:
+                ydot *= 1.33
             self.previous_angle = angle
             self.prev_time_passed = time_passed
             return [xdot, ydot]
@@ -86,7 +90,7 @@ class WSREstimator(Estimator):
         elif move == "backward":  # backward is positive!
             return [magnitude, 0]
         elif move == "right":  # right is positive!
-            return [0, magnitude]
+            return [0, 1.33 * magnitude]
         elif move == "left":  # left is negative!
             return [0, -magnitude]
         else:

@@ -65,6 +65,13 @@ def main() -> None:
         required=False,
         default="circle",
     )
+    parser.add_argument(
+        "-runtime",
+        "--runtime",
+        help="Choose how long to run in seconds: i.e. -runtime 10",
+        required=False,
+        default=10.0,
+    )
 
     argument = parser.parse_args()
     simulation = parse_bool_argument(argument.simulation)
@@ -74,9 +81,12 @@ def main() -> None:
     velocity_magnitude = parse_float_argument(argument.velmag)
     time_step = parse_float_argument(argument.timestep)
     move = argument.move
+    runtime = parse_float_argument(argument.runtime)
 
-    # start a rosmaster (does not work on ssh access)
-    # start_roscore()
+    # start a rosmaster if in simulation
+    # start manually if using ssh access
+    if simulation:
+        start_roscore()
 
     # create an instance of the nexus car
     nexus_car = create_a_nexus_car(
@@ -86,6 +96,7 @@ def main() -> None:
         velocity_magnitude=velocity_magnitude,
         time_step=time_step,
         move=move,
+        runtime=runtime,
     )
 
     # create a landmark, initialize on robot position (0,0)
@@ -98,7 +109,10 @@ def main() -> None:
 
     # choose what to do
     # nexus_car.move_demo_square()
-    time.sleep(5)
+    print("Wait...")
+    time.sleep(4)
+    print("Please start broadcasting now.")
+    time.sleep(1)
     nexus_car.start()
 
     # stop the system
